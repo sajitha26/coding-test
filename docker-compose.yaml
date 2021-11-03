@@ -1,0 +1,38 @@
+version: '3.8'
+services:
+  php-apache-environment:
+    container_name: php-test
+    build:
+      dockerfile: PhpDockerfile
+      args:
+        uid: ${UID}
+    depends_on:
+      - db
+    volumes:
+      - ./src:/var/www/html/
+      - ./apache_log:/var/log/apache2
+    ports:
+      - 80:80
+  db:
+    container_name: db
+    image: mysql
+    restart: always
+    environment:
+        MYSQL_ROOT_PASSWORD: mysqltest
+        MYSQL_DATABASE: accounts
+        MYSQL_USER: accounts_adm
+        MYSQL_PASSWORD: accounts_test
+    volumes:
+      - ./dbs:/var/lib/minesql
+      - ./db_init:/docker-entrypoint-initdb.d/:ro
+    ports:
+      - 3306:3306
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    ports:
+      - '8008:80'
+    restart: always
+    environment:
+      PMA_HOST: db
+    depends_on:
+      - db
